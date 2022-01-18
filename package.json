@@ -1,0 +1,24 @@
+{
+  "name": "gitsanahub",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.ts",
+  "scripts": {
+    "start": "ts-node index.ts",
+    "dev": "nodemon index.ts"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/node": "^17.0.9",
+    "nodemon": "^2.0.15"
+  },
+  "dependencies": {
+    "dotenv": "^14.2.0",
+    "reshuffle": "^1.0.9",
+    "reshuffle-asana-connector": "^0.0.2",
+    "reshuffle-github-connector": "^0.0.2",
+    "ts-node": "^10.4.0"
+  }
+}
