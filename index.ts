@@ -40,15 +40,21 @@ githubConnector.on({
             return task.name.includes(`#${githubIssue.number}`);
         });
 
+        console.log({ githubIssue, asanaTask })
+
         if (asanaTask) {
 
-            if (asanaTask.name !== `${githubIssue.title} #${githubIssue.number}`) {
+            const matchName = asanaTask.name !== `${githubIssue.title} #${githubIssue.number}`;
+            const matchStatus = asanaTask.completed && githubIssue.status == 'closed';
+
+            if (matchName && matchStatus) {
+                console.log('nothing to change really')
+            } else {
                 console.log('updating existing asanaTask', asanaTask.gid);
                 await asanaConnector.sdk().tasks.update(asanaTask.gid, {
                     name: `${githubIssue.title} #${githubIssue.number}`.trim(),
+                    completed: githubIssue.state == "closed",
                 });
-            } else {
-                console.log('nothing to change really')
             }
 
         } else {
@@ -59,6 +65,7 @@ githubConnector.on({
                 name: `${githubIssue.title} #${githubIssue.number}`.trim(),
                 projects: process.env.ASANA_PROJECT_ID,
                 tags: process.env.ASANA_TAG,
+                completed: githubIssue.state === "closed",
             });
 
         }
@@ -75,8 +82,6 @@ asanaConnector.on({
 
     const asanaTask = await asanaConnector.sdk().tasks.findById(event.resource.gid);
 
-    console.log(asanaTask.tags.map((tag: any) => tag.gid))
-
     if (asanaTask.tags.map((tag: any) => tag.gid).includes(process.env.ASANA_TAG)) {
 
         // asana task includes "github" tag
@@ -90,9 +95,16 @@ asanaConnector.on({
             return asanaTask.name.includes(`#${issue.number}`);
         });
 
+        console.log({ githubIssue, asanaTask })
+
         if (githubIssue) {
 
-            if (asanaTask.name !== `${githubIssue.title} #${githubIssue.number}`) {
+            const matchName = asanaTask.name !== `${githubIssue.title} #${githubIssue.number}`;
+            const matchStatus = asanaTask.completed && githubIssue.status == 'closed';
+
+            if (matchName && matchStatus) {
+                console.log('nothing to change really')
+            } else {
                 console.log('updating existing githubIssue', githubIssue.number);
                 await githubConnector.sdk().issues.update({
                     owner: process.env.GITHUB_OWNER,
@@ -101,13 +113,13 @@ asanaConnector.on({
                     title: asanaTask.name.split("#")[0].trim(),
                     state: asanaTask.completed ? "closed" : "open",
                 });
-            } else {
-                console.log('nothing to change really')
             }
 
         } else {
 
-            await asanaConnector.sdk().tasks.delete(asanaTask.gid);
+            // need to create issue
+            // then get just created issue number
+            // then update asana task and add number
 
             // await githubConnector.sdk().issues.create({
             //     owner: process.env.GITHUB_OWNER,
